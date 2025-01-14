@@ -22,46 +22,54 @@ export const App = () => {
   const [usersFromServer, setUsersFromServer] = useState<User[]>([]);
   const [commentsForPost, setCommentsForPost] = useState<Comment[]>([]);
   const [postsForUser, setPostsForUser] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState<IsLoading>({});
-  const [showError, setShowError] = useState<ShowError>({});
+  const [isLoading, setIsLoading] = useState<IsLoading>({
+    postListLoading: false,
+    PostDetailsLoading: false,
+    usersLoading: false,
+  });
 
-  const handleSetError = (key: keyof ShowError, value: boolean) => {
-    setShowError((prev) => ({ ...prev, [key]: value }));
-  };
+  const [showError, setShowError] = useState<ShowError>({
+    usersError: false,
+    PostsLoadingError: false,
+    PostDetailsError: false,
+  });
 
   useEffect(() => {
     getUsers()
       .then(setUsersFromServer)
-      .catch(() => handleSetError('usersError', true));
+      .catch(() => setShowError(prev => ({ ...prev, usersError: true })));
   }, []);
 
   useEffect(() => {
     if (userSelected) {
-      setIsLoading((prev) => ({ ...prev, postListLoading: true }));
+      setIsLoading(prev => ({ ...prev, postListLoading: true }));
       getPostsForUser(userSelected.id)
-        .then((posts) => {
+        .then(posts => {
           setPostSelected(null);
           setPostsForUser(posts);
         })
-        .catch(() => handleSetError('PostsLoadingError', true))
+        .catch(() =>
+          setShowError(prev => ({ ...prev, PostsLoadingError: true })),
+        )
         .finally(() =>
-          setIsLoading((prev) => ({ ...prev, postListLoading: false }))
+          setIsLoading(prev => ({ ...prev, postListLoading: false })),
         );
     }
   }, [userSelected]);
 
   useEffect(() => {
     if (postSelected) {
-      setIsLoading((prev) => ({ ...prev, PostDetailsLoading: true }));
+      setIsLoading(prev => ({ ...prev, PostDetailsLoading: true }));
       getCommentsForPost(postSelected.id)
         .then(setCommentsForPost)
-        .catch(() => handleSetError('PostDetailsError', true))
+        .catch(() =>
+          setShowError(prev => ({ ...prev, PostDetailsError: true })),
+        )
         .finally(() =>
-          setIsLoading((prev) => ({ ...prev, PostDetailsLoading: false }))
+          setIsLoading(prev => ({ ...prev, PostDetailsLoading: false })),
         );
     }
   }, [postSelected]);
-
 
   const renderError = (errorKey: keyof ShowError) =>
     showError[errorKey] && (
@@ -69,7 +77,6 @@ export const App = () => {
         Something went wrong!
       </div>
     );
-
 
   const renderLoader = (loadingKey: keyof IsLoading) =>
     isLoading[loadingKey] && <Loader />;
@@ -113,7 +120,7 @@ export const App = () => {
               'is-parent',
               'is-8-desktop',
               'Sidebar',
-              { 'Sidebar--open': postSelected }
+              { 'Sidebar--open': postSelected },
             )}
           >
             <div className="tile is-child box is-success">

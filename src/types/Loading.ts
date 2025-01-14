@@ -1,5 +1,5 @@
 export interface IsLoading {
-     postListLoading?: boolean; 
-     PostDetailsLoading?: boolean; 
-     usersLoading?: boolean 
-    }
+  postListLoading: boolean;
+  PostDetailsLoading: boolean;
+  usersLoading: boolean;
+}
